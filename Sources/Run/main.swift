@@ -17,7 +17,8 @@ import App
 /// .run() runs the Droplet's commands, 
 /// if no command is given, it will default to "serve"
 
-setenv("DATABASE_URL", "postgres://tanfivdjxapkul:0008c580961e453c93c777c205b9e7b0158dce945096f1f985e287f7ead086a3@localhost/d2cj7i4r2u8nq6", 1)
+//setenv("DATABASE_URL", "postgres://tanfivdjxapkul:0008c580961e453c93c777c205b9e7b0158dce945096f1f985e287f7ead086a3@localhost/d2cj7i4r2u8nq6", 1)
+setenv("DATABASE_URL", "postgres://hygziviienbche:90c60426363db158e435caf81ef5748070a8654874cd18150b1b4f9aeca4c7b2@ec2-107-21-233-72.compute-1.amazonaws.com:5432/d8sug7gqkae4om", 1)
 //setenv("DATABASE_URL","postgres://tanfivdjxapkul:0008c580961e453c93c777c205b9e7b0158dce945096f1f985e287f7ead086a3@ec2-54-235-80-137.compute-1.amazonaws.com:5432/d2cj7i4r2u8nq6", 1)
 setenv("AWS_ACCESS_KEY_ID", "AKIAIENWEJQCLRECQHGA", 1)
 //setenv("AWS_ACCESS_KEY_ID", "AKIAIGPUVMOAB6XTGKFA", 1)
