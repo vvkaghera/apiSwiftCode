@@ -63,6 +63,13 @@ final class CascadeMigration: Preparation {
                 "foreign key (user_id) " +
                 "references users(user_id) " +
                 " on delete cascade; "
+        let dropEventSQL = "alter table events " +
+        "drop constraint \"_fluent_fk_events.user_id-users.user_id\"; "
+        let addEventSQL = "alter table events " +
+            "add constraint \"_fluent_fk_events.user_id-users.user_id\" " +
+            "foreign key (user_id) " +
+            "references users(user_id) " +
+        " on delete cascade; "
         let dropTokenSQL = "alter table tokens " +
             "drop constraint \"_fluent_fk_tokens.user_id-users.user_id\"; "
         let addTokenSQL = "alter table tokens " +
@@ -75,6 +82,8 @@ final class CascadeMigration: Preparation {
         try database.driver.raw(addServiceSQL)
         try database.driver.raw(dropVendingSQL)
         try database.driver.raw(addVendingSQL)
+        try database.driver.raw(dropEventSQL)
+        try database.driver.raw(addEventSQL)
         try database.driver.raw(dropTokenSQL)
         try database.driver.raw(addTokenSQL)
     }

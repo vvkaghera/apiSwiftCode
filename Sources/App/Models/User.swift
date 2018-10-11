@@ -44,6 +44,7 @@ final class User: Model, Timestampable {
         case facebookID = "facebook_id"
         case passcode
         case vendings
+        case events
         case passcodeExpire = "passcode_expire"
         case cityState = "city_state"
         case postalcode
@@ -100,6 +101,12 @@ final class User: Model, Timestampable {
 
 extension User {
     var vendings: Children<User, Vending> {
+        return children()
+    }
+}
+
+extension User {
+    var events: Children<User, Event> {
         return children()
     }
 }
@@ -206,6 +213,7 @@ extension User: JSONConvertible {
         try json.set(DB.postalcode.ⓡ, postalcode)
         try json.set(DB.deviceID.ⓡ, deviceID)
         try json.set(DB.vendings.ⓡ, vendings.all())
+        try json.set(DB.events.ⓡ, events.all())
         return json
     }
 }

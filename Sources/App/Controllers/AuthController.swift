@@ -69,6 +69,7 @@ final class AuthController: Controlling {
             var userJSON = JSON()
             try userJSON.set("user", validUser)
             try userJSON.set("token", token.token)
+            print("user json is ", userJSON)
             return userJSON
         }
     }

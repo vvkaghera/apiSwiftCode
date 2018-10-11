@@ -28,6 +28,10 @@ final class ImageController: Controlling {
             let vendingID = try req.parameters.next(String.self)
             return try self.s3ListGrandKids(grandParentDir: "vendings", parentDir: vendingID)
         }
+        drop.get("events/images", String.parameter) { req in
+            let eventID = try req.parameters.next(String.self)
+            return try self.s3ListGrandKids(grandParentDir: "events", parentDir: eventID)
+        }
     }
 
     func addGroupedRoutes(group: RouteBuilder) {
@@ -48,11 +52,20 @@ final class ImageController: Controlling {
         group.get("vendings/image/upload", String.parameter, String.parameter) { req in
             return try self.vendingPresigned(httpMethod: .put, req: req)
         }
+        
+        group.get("events/image/upload", String.parameter, String.parameter) { req in
+            return try self.eventPresigned(httpMethod: .put, req: req)
+        }
 
         group.delete("vendings/image", String.parameter, String.parameter) { req in
             let vendingID = try req.parameters.next(String.self)
             let imageName = try req.parameters.next(String.self)
             return try self.s3DeleteObject(grandParentDir: "vendings", parentDir: vendingID, objectName: imageName)
+        }
+        group.delete("events/image", String.parameter, String.parameter) { req in
+            let eventID = try req.parameters.next(String.self)
+            let imageName = try req.parameters.next(String.self)
+            return try self.s3DeleteObject(grandParentDir: "events", parentDir: eventID, objectName: imageName)
         }
     }
 
@@ -64,6 +77,14 @@ final class ImageController: Controlling {
         return try self.s3GetPresignedJSON(httpMethod: httpMethod, dirPrefix: dirPrefix, fileName: fileName)
     }
 
+    fileprivate func eventPresigned(httpMethod: HTTPMethod, req: Request, headers: [String: String] = [:])
+        throws -> JSON {
+            let folderID = try req.parameters.next(String.self)
+            let fileName = try req.parameters.next(String.self)
+            let dirPrefix = "events/\(folderID)"
+            return try self.s3GetPresignedJSON(httpMethod: httpMethod, dirPrefix: dirPrefix, fileName: fileName)
+    }
+    
     fileprivate func profilePresigned(httpMethod: HTTPMethod, req: Request, headers: [String: String] = [:])
     throws -> JSON {
         let folderID = try req.parameters.next(String.self)

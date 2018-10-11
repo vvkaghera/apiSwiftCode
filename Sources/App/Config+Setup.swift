@@ -41,6 +41,7 @@ extension Config {
         preparations.append(Vending.self)
         preparations.append(Token.self)
         preparations.append(Service.self)
+        preparations.append(Event.self)
         preparations.append(CascadeMigration.self)
         preparations.append(PlusOneMigration.self)
         preparations.append(PhoneNullAndFBMigration.self)
