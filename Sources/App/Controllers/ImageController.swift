@@ -10,7 +10,7 @@ import HTTP
 import BML  // XML Parser
 
 final class ImageController: Controlling {
-    fileprivate static let bucketName = "mouldypnakotic1" // "nyarlathotepbrous"
+    fileprivate static let bucketName = "mouldypnakotic" // "nyarlathotepbrous"
     fileprivate let log: LogProtocol
     fileprivate let client: ClientFactoryProtocol
     fileprivate let s3Signer: S3SignerAWS?
