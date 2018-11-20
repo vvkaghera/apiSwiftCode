@@ -17,9 +17,9 @@ final class Event: Model, Timestampable {
     var log: LogProtocol?
     
     var eventName: String
-    var eventDate: String
-    var startTime: String
-    var endTime: String
+    var eventDate: Date
+    var startTime: Date
+    var endTime: Date
     var location: String
     var longDescription: String?
     var noOfGuests: String?
@@ -39,7 +39,7 @@ final class Event: Model, Timestampable {
         
     }
     
-    init(id: String? = nil, eventName: String, eventDate: String, startTime: String, endTime: String, location: String,
+    init(id: String? = nil, eventName: String, eventDate: Date, startTime: Date, endTime: Date, location: String,
          longDescription: String?, noOfGuests: String?,
          user: User) throws {
         self.eventName = eventName
@@ -55,7 +55,15 @@ final class Event: Model, Timestampable {
     }
     
     init(row: Row) throws {
+        let dateFormatter = DateFormatter()
+        //let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
+        //dateFormatter.locale = enUSPosixLocale
+        dateFormatter.timeZone = TimeZone.autoupdatingCurrent
+        //dateFormatter.timeZone = TimeZone.init(identifier: "UTC")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        //dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         eventName = try row.get(DB.eventName.ⓡ)
+        
         eventDate = try row.get(DB.eventDate.ⓡ)
         startTime = try row.get(DB.startTime.ⓡ)
         endTime =   try row.get(DB.endTime.ⓡ)
@@ -140,24 +148,34 @@ extension Event: JSONConvertible {
         
         
         
-        
+        print("Event json=\(json)")
         do { id = try json.get(DB.id.ⓡ) } catch { id = nil }
         let rawUserId: String = try json.get(Vending.DB.userIdKey.ⓡ)
         guard let user = try User.find(rawUserId) else {
-            throw Abort(.badRequest, reason: "User id \(rawUserId) not found for vending")
+            throw Abort(.badRequest, reason: "User id \(rawUserId) not found for event")
         }
         guard let eventName: String = try json.get(DB.eventName.ⓡ) else {
-            throw Abort(.badRequest, reason: "Event Name not found for vending")
+            throw Abort(.badRequest, reason: "Event Name not found for event")
         }
         
-        guard let eventDate: String = try json.get(DB.eventDate.ⓡ) else {
-            throw Abort(.badRequest, reason: "Event Date not found for vending")
+
+        let dateFormatter = DateFormatter()
+        //let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
+        //dateFormatter.locale = enUSPosixLocale
+        dateFormatter.timeZone = TimeZone.autoupdatingCurrent
+        //dateFormatter.timeZone = TimeZone.init(identifier: "UTC")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        
+        
+        guard let eventDate: Date = try dateFormatter.date(from: json.get(DB.eventDate.ⓡ )) else {
+            throw Abort(.badRequest, reason: "Event Date not found for event")
         }
-        guard let startTime: String = try json.get(DB.startTime.ⓡ) else {
-            throw Abort(.badRequest, reason: "Start Time not found for vending")
+        
+        guard let startTime: Date = try dateFormatter.date(from: json.get(DB.startTime.ⓡ)) else {
+            throw Abort(.badRequest, reason: "Start Time not found for event")
         }
-        guard let endTime: String = try json.get(DB.endTime.ⓡ) else {
-            throw Abort(.badRequest, reason: "End Time not found for vending")
+        guard let endTime: Date = try dateFormatter.date(from: json.get(DB.endTime.ⓡ)) else {
+            throw Abort(.badRequest, reason: "End Time not found for event")
         }
         
         guard let location: String = try json.get(DB.location.ⓡ) else {
@@ -196,6 +214,7 @@ extension Event: JSONConvertible {
         try json.set(DB.longDescription.ⓡ, longDescription)
         try json.set(DB.noOfGuests.ⓡ, noOfGuests)
         try json.set(DB.userIdKey.ⓡ, userId)
+        print("json sent is", json)
         return json
     }
 }
@@ -206,9 +225,12 @@ extension Event: Updateable {
     public static var updateableKeys: [UpdateableKey<Event>] {
         return [
             UpdateableKey(DB.eventName.ⓡ, String.self) { event, content in event.eventName = content },
-            UpdateableKey(DB.eventDate.ⓡ, String.self) {event, content in event.eventDate = content},
-            UpdateableKey(DB.startTime.ⓡ, String.self) { event, content in event.startTime = content },
-            UpdateableKey(DB.endTime.ⓡ, String.self) { event, content in event.endTime = content },
+            UpdateableKey(DB.eventDate.ⓡ, Date.self) {event, content in event.eventDate = content},
+            UpdateableKey(DB.startTime.ⓡ, Date.self) { event, content in event.startTime = content },
+            UpdateableKey(DB.endTime.ⓡ, Date.self) { event, content in event.endTime = content },
+            //UpdateableKey(DB.eventDate.ⓡ, String.self) {event, content in event.eventDate = content},
+            //UpdateableKey(DB.startTime.ⓡ, String.self) { event, content in event.startTime = content },
+            //UpdateableKey(DB.endTime.ⓡ, String.self) { event, content in event.endTime = content },
             UpdateableKey(DB.location.ⓡ, String.self) { event, content in event.location = content },
             UpdateableKey(DB.longDescription.ⓡ, String.self) { event, content in event.longDescription = content },
             UpdateableKey(DB.noOfGuests.ⓡ, String.self) { event, content in event.noOfGuests = content }
@@ -221,4 +243,24 @@ extension Event: Updateable {
 
 extension Event: TokenAuthenticatable {
     typealias TokenType = Token
+}
+extension Date
+{
+    func toString( dateFormat format  : String ) -> String
+    {
+        let dateFormatter = DateFormatter()
+        let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.locale = enUSPosixLocale
+        dateFormatter.dateFormat = format
+        return dateFormatter.string(from: self)
+    }
+    func toDate( stringFormat format: String) -> Date
+    {
+        let dateFormatter = DateFormatter()
+        let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.locale = enUSPosixLocale
+        dateFormatter.timeZone = TimeZone.autoupdatingCurrent
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return dateFormatter.date(from: format)!
+    }
 }
