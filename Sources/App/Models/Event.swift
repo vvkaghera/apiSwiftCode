@@ -58,8 +58,8 @@ final class Event: Model, Timestampable {
         let dateFormatter = DateFormatter()
         //let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
         //dateFormatter.locale = enUSPosixLocale
-        dateFormatter.timeZone = TimeZone.autoupdatingCurrent
-        //dateFormatter.timeZone = TimeZone.init(identifier: "UTC")
+        //dateFormatter.timeZone = TimeZone.autoupdatingCurrent
+        dateFormatter.timeZone = TimeZone.init(identifier: "UTC")
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         //dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         eventName = try row.get(DB.eventName.ⓡ)
@@ -162,8 +162,8 @@ extension Event: JSONConvertible {
         let dateFormatter = DateFormatter()
         //let enUSPosixLocale = Locale(identifier: "en_US_POSIX")
         //dateFormatter.locale = enUSPosixLocale
-        dateFormatter.timeZone = TimeZone.autoupdatingCurrent
-        //dateFormatter.timeZone = TimeZone.init(identifier: "UTC")
+        //dateFormatter.timeZone = TimeZone.autoupdatingCurrent
+        dateFormatter.timeZone = TimeZone.init(identifier: "UTC")
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         
         
