@@ -25,9 +25,9 @@ struct TwilioManager {
     public static var log: LogProtocol?
 
     private let urlPrefix = "https://api.twilio.com/2010-04-01/Accounts/"
-    private let sid: String // = "AC40e82047b23537e9deeda88386a29185"
-    private let token: String // = "ed9278dafdd7bbfa963b3071351260c2"
-    private let fromPhone: String // = "+12133220623"
+    private let sid: String 
+    private let token: String 
+    private let fromPhone: String 
     private let toPrefixDefault = "+1"
 
     func sendSMSFromClient(_ client: ClientFactoryProtocol, toPhone: String, message: String) throws {
