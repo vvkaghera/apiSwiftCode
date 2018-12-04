@@ -9,7 +9,7 @@ import HTTP
 struct SendBirdManager {
     static let shared = SendBirdManager()
     fileprivate let urlPrefix = "https://api.sendbird.com/v3/"
-    fileprivate let appToken: String // = "582dd7133f22f3f548566b666295ac9b72c1b069"
+    fileprivate let appToken: String 
 
     fileprivate init?() {
         guard let
