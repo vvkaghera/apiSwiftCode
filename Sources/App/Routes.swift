@@ -22,6 +22,8 @@ extension Droplet {
 
         let users = try UserController(log: self.log)
         tokenOnUsers.resource("users", users)
+        //resource("favorites", users)
+        users.addRoutes(drop: self)
         users.addGroupedRoutes(group: tokenOnUsers)
         let vendings = try VendingController(log: self.log)
         vendings.addOpenRoutes(drop: self)
@@ -29,6 +31,9 @@ extension Droplet {
         let events = try EventController(log: self.log)
         events.addOpenRoutes(drop: self)
         events.addGroupedRoutes(group: tokenOnUsers)
+        //let favorites = try FavoriteController(log: self.log)
+        //favorites.addOpenRoutes(drop: self)
+        //favorites.addGroupedRoutes(group: tokenOnUsers)
         let services = try ServiceController(log: self.log)
         services.addGroupedRoutes(group: tokenOnUsers)
         let images = try ImageController(log: log, client: client, s3Signer: s3Signer)
