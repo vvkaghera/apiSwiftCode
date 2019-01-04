@@ -150,7 +150,7 @@ extension Event: JSONConvertible {
         
         print("Event json=\(json)")
         do { id = try json.get(DB.id.ⓡ) } catch { id = nil }
-        let rawUserId: String = try json.get(Vending.DB.userIdKey.ⓡ)
+        let rawUserId: String = try json.get(Event.DB.userIdKey.ⓡ)
         guard let user = try User.find(rawUserId) else {
             throw Abort(.badRequest, reason: "User id \(rawUserId) not found for event")
         }

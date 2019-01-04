@@ -6,6 +6,7 @@
 
 import Vapor
 import FluentProvider
+import Fluent
 import AuthProvider
 import PostgreSQL
 import PostgreSQLDriver
@@ -45,12 +46,18 @@ final class User: Model, Timestampable {
         case passcode
         case vendings
         case events
+        case favorites
         case passcodeExpire = "passcode_expire"
         case cityState = "city_state"
         case postalcode
         case deviceID = "device_id"
     }
 
+    public enum PivotDB: String {
+        case pivotUserId = "user_id"
+        case pivotVendorId = "vending_id"
+    }
+    
     init(id: String? = nil, firstName: String?, lastName: String?, email: String?, countryCode: String?,
          phone: String?, facebookID: String? = nil, passcode: String? = nil, passcodeExpire: Date? = nil,
          postalcode: String?, cityState: String?, deviceID: String?) {
@@ -109,8 +116,18 @@ extension User {
     var events: Children<User, Event> {
         return children()
     }
+    
+    var favorites: Siblings<User, Vending, Pivot<User, Vending>>{
+        return siblings()
+    }
 }
-
+/*
+extension User {
+    var favorites: Children<User, Favorite> {
+        return children()
+    }
+}
+*/
 // https://github.com/brokenhandsio/SteamPress/blob/master/Sources/SteamPress/Models/Preparations.swift#L54
 extension User: Preparation {
     static func prepare(_ database: Fluent.Database) throws {
@@ -214,6 +231,7 @@ extension User: JSONConvertible {
         try json.set(DB.deviceID.ⓡ, deviceID)
         try json.set(DB.vendings.ⓡ, vendings.all())
         try json.set(DB.events.ⓡ, events.all())
+        try json.set(DB.favorites.ⓡ, favorites.all())
         return json
     }
 }
