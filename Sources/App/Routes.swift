@@ -31,6 +31,11 @@ extension Droplet {
         let events = try EventController(log: self.log)
         events.addOpenRoutes(drop: self)
         events.addGroupedRoutes(group: tokenOnUsers)
+        
+        let orders = try HireNow(log: self.log)
+        orders.addOpenRoutes(drop: self)
+        orders.addGroupedRoutes(group: tokenOnUsers)
+        
         //let favorites = try FavoriteController(log: self.log)
         //favorites.addOpenRoutes(drop: self)
         //favorites.addGroupedRoutes(group: tokenOnUsers)
