@@ -24,7 +24,9 @@ final class Event: Model, Timestampable {
     var longDescription: String?
     var noOfGuests: String?
     var userId: Identifier
-    
+    var budget: String?
+    var lat: String?
+    var long: String?
     
     public enum DB: String {
         case id = "event_id"
@@ -36,12 +38,15 @@ final class Event: Model, Timestampable {
         case longDescription = "long_description"
         case noOfGuests = "no_of_guests"
         case userIdKey = "user_id"
-        
+        case orders
+        case budget = "budget"
+        case lat = "latitude"
+        case long = "longitude"
     }
     
     init(id: String? = nil, eventName: String, eventDate: Date, startTime: Date, endTime: Date, location: String,
          longDescription: String?, noOfGuests: String?,
-         user: User) throws {
+         user: User, budget: String?, lat: String?, long: String?) throws {
         self.eventName = eventName
         self.eventDate = eventDate
         self.startTime = startTime
@@ -51,6 +56,10 @@ final class Event: Model, Timestampable {
         self.noOfGuests = noOfGuests
         guard let userId = user.id else { throw Abort(.badRequest, reason: "User id not found in vending init") }
         self.userId = userId
+        self.budget = budget
+        self.lat = lat
+        self.long = long
+    
         if let id = id { self.id = Identifier(id) }
     }
     
@@ -71,6 +80,9 @@ final class Event: Model, Timestampable {
         longDescription = try row.get(DB.longDescription.ⓡ)
         noOfGuests = try row.get(DB.noOfGuests.ⓡ)
         userId = try row.get(DB.userIdKey.ⓡ)
+        budget = try row.get(DB.budget.ⓡ)
+        lat = try row.get(DB.lat.ⓡ)
+        long = try row.get(DB.long.ⓡ)
     }
     
     func makeRow() throws -> Row {
@@ -83,6 +95,9 @@ final class Event: Model, Timestampable {
         try row.set(DB.longDescription.ⓡ, longDescription)
         try row.set(DB.noOfGuests.ⓡ, noOfGuests)
         try row.set(DB.userIdKey.ⓡ, userId)
+        try row.set(DB.budget.ⓡ, budget)
+        try row.set(DB.lat.ⓡ, lat)
+        try row.set(DB.long.ⓡ, long)
         return row
     }
 }
@@ -92,6 +107,13 @@ extension Event {
         return parent(id: userId)
     }
 }
+
+extension Event {
+    var orders: Children<Event, Order> {
+        return children()
+    }
+}
+
 extension Event: ResponseRepresentable { }
 //extension Vending: JSONRepresentable {}
 
@@ -142,6 +164,10 @@ extension Event: JSONConvertible {
         let id: String?
         let longDescription : String?
         let noOfGuests: String?
+        
+        let budget: String?
+        let lat: String?
+        let long: String?
         //let eventDate: Date?
         //let startTime: Date?
         //let endTime: Date?
@@ -185,7 +211,9 @@ extension Event: JSONConvertible {
         
         do { longDescription = try json.get(DB.longDescription.ⓡ) } catch { longDescription = nil }
         do { noOfGuests = try json.get(DB.noOfGuests.ⓡ) } catch { noOfGuests = nil }
-        
+         do { budget = try json.get(DB.budget.ⓡ) } catch { budget = nil }
+        do { lat = try json.get(DB.lat.ⓡ) } catch { lat = nil }
+         do { long = try json.get(DB.long.ⓡ) } catch { long = nil }
         
         
         try self.init(
@@ -197,7 +225,10 @@ extension Event: JSONConvertible {
             location: location,
             longDescription: longDescription,
             noOfGuests: noOfGuests,
-            user: user
+            user: user,
+            budget: budget,
+            lat: lat,
+            long: long
         )
     }
     
@@ -214,6 +245,10 @@ extension Event: JSONConvertible {
         try json.set(DB.longDescription.ⓡ, longDescription)
         try json.set(DB.noOfGuests.ⓡ, noOfGuests)
         try json.set(DB.userIdKey.ⓡ, userId)
+        try json.set(DB.budget.ⓡ, budget)
+        try json.set(DB.lat.ⓡ, lat)
+        try json.set(DB.long.ⓡ, long)
+        try json.set(DB.orders.ⓡ, orders.all())
         print("json sent is", json)
         return json
     }
@@ -233,7 +268,10 @@ extension Event: Updateable {
             //UpdateableKey(DB.endTime.ⓡ, String.self) { event, content in event.endTime = content },
             UpdateableKey(DB.location.ⓡ, String.self) { event, content in event.location = content },
             UpdateableKey(DB.longDescription.ⓡ, String.self) { event, content in event.longDescription = content },
-            UpdateableKey(DB.noOfGuests.ⓡ, String.self) { event, content in event.noOfGuests = content }
+            UpdateableKey(DB.noOfGuests.ⓡ, String.self) { event, content in event.noOfGuests = content },
+            UpdateableKey(DB.budget.ⓡ, String.self) { event, content in event.budget = content },
+            UpdateableKey(DB.lat.ⓡ, String.self) { event, content in event.lat = content },
+            UpdateableKey(DB.long.ⓡ, String.self) { event, content in event.long = content }
             
         ]
     }
