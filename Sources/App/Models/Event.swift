@@ -39,6 +39,7 @@ final class Event: Model, Timestampable {
         case noOfGuests = "no_of_guests"
         case userIdKey = "user_id"
         case orders
+        case openJobs
         case budget = "budget"
         case lat = "latitude"
         case long = "longitude"
@@ -110,6 +111,10 @@ extension Event {
 
 extension Event {
     var orders: Children<Event, Order> {
+        return children()
+    }
+    
+    var openJobs: Children<Event, Job> {
         return children()
     }
 }
@@ -249,6 +254,7 @@ extension Event: JSONConvertible {
         try json.set(DB.lat.ⓡ, lat)
         try json.set(DB.long.ⓡ, long)
         try json.set(DB.orders.ⓡ, orders.all())
+        try json.set(DB.openJobs.ⓡ, openJobs.all())
         print("json sent is", json)
         return json
     }

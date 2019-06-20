@@ -29,6 +29,7 @@ final class User: Model, Timestampable {
     var cityState: String?
     var postalcode: String?
     var deviceID: String?
+    var stripeCustomer_id: String?
 
     var isDebugUser: Bool {
         guard let phone = phone else { return false }
@@ -51,6 +52,7 @@ final class User: Model, Timestampable {
         case cityState = "city_state"
         case postalcode
         case deviceID = "device_id"
+        case stripeCustomer_id = "stripeCustomer_id"
     }
 
     public enum PivotDB: String {
@@ -60,7 +62,7 @@ final class User: Model, Timestampable {
     
     init(id: String? = nil, firstName: String?, lastName: String?, email: String?, countryCode: String?,
          phone: String?, facebookID: String? = nil, passcode: String? = nil, passcodeExpire: Date? = nil,
-         postalcode: String?, cityState: String?, deviceID: String?) {
+         postalcode: String?, cityState: String?, deviceID: String?, stripeCustomer_id: String?) {
         self.firstName = firstName
         self.lastName = lastName
         self.email = email
@@ -72,6 +74,7 @@ final class User: Model, Timestampable {
         self.postalcode = postalcode
         self.cityState = cityState
         self.deviceID = deviceID
+        self.stripeCustomer_id = stripeCustomer_id
         if let id = id { self.id = Identifier(id) }
     }
 
@@ -87,6 +90,8 @@ final class User: Model, Timestampable {
         postalcode = try row.get(DB.postalcode.ⓡ)
         cityState = try row.get(DB.cityState.ⓡ)
         deviceID = try row.get(DB.deviceID.ⓡ)
+        stripeCustomer_id = try row.get(DB.stripeCustomer_id.ⓡ)
+        
     }
 
     func makeRow() throws -> Row {
@@ -102,6 +107,8 @@ final class User: Model, Timestampable {
         try row.set(DB.postalcode.ⓡ, postalcode)
         try row.set(DB.cityState.ⓡ, cityState)
         try row.set(DB.deviceID.ⓡ, deviceID)
+        try row.set(DB.stripeCustomer_id.ⓡ, stripeCustomer_id)
+        
         return row
     }
 }
@@ -121,6 +128,13 @@ extension User {
         return siblings()
     }
 }
+
+//extension User {
+//    var deviceToken: Children<User, DeviceToken> {
+//        return children()
+//    }
+//}
+
 /*
 extension User {
     var favorites: Children<User, Favorite> {
@@ -143,6 +157,8 @@ extension User: Preparation {
             builder.string(DB.cityState.ⓡ, optional: true)
             builder.string(DB.postalcode.ⓡ, optional: true)
             builder.string(DB.deviceID.ⓡ, optional: true)
+            builder.string(DB.stripeCustomer_id.ⓡ, optional: true)
+            
         }
         // "there’s no need to manually create indexes on unique columns; doing so
         // would just duplicate the automatically-created index."
@@ -192,6 +208,7 @@ extension User: JSONConvertible {
         let cityState: String?
         let postalcode: String?
         let deviceID: String?
+        let stripeCustomer_id: String?
         do { id = try json.get(DB.id.ⓡ) } catch { id = UUID().uuidString }
         do { firstName = try json.get(DB.firstName.ⓡ) } catch { firstName = nil }
         do { lastName = try json.get(DB.lastName.ⓡ) } catch { lastName = nil }
@@ -202,6 +219,7 @@ extension User: JSONConvertible {
         do { cityState = try json.get(DB.cityState.ⓡ) } catch { cityState = nil }
         do { postalcode = try json.get(DB.postalcode.ⓡ) } catch { postalcode = nil }
         do { deviceID = try json.get(DB.deviceID.ⓡ) } catch { deviceID = nil }
+        do { stripeCustomer_id = try json.get(DB.stripeCustomer_id.ⓡ) } catch { stripeCustomer_id = nil }
 
         self.init(
             id: id,
@@ -213,7 +231,8 @@ extension User: JSONConvertible {
             facebookID: facebookID,
             postalcode: postalcode,
             cityState: cityState,
-            deviceID: deviceID
+            deviceID: deviceID,
+            stripeCustomer_id: stripeCustomer_id
         )
     }
 
@@ -229,6 +248,7 @@ extension User: JSONConvertible {
         try json.set(DB.cityState.ⓡ, cityState)
         try json.set(DB.postalcode.ⓡ, postalcode)
         try json.set(DB.deviceID.ⓡ, deviceID)
+        try json.set(DB.stripeCustomer_id.ⓡ, stripeCustomer_id)
         try json.set(DB.vendings.ⓡ, vendings.all())
         try json.set(DB.events.ⓡ, events.all())
         try json.set(DB.favorites.ⓡ, favorites.all())

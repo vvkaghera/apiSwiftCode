@@ -6,6 +6,7 @@
 
 import Vapor
 import Fluent
+import Stripe
 
 final class UserController: Controlling, ResourceRepresentable {
     fileprivate let log: LogProtocol
@@ -20,6 +21,7 @@ final class UserController: Controlling, ResourceRepresentable {
         print("create favorite hit")
         userGroup.post("create", handler: createFavorite)
         userGroup.post("delete", handler: deleteFavorite)
+
         /*
         categoryGroup.post("create", String.parameter) { req in
             print("============\n\(req)")
@@ -34,6 +36,7 @@ final class UserController: Controlling, ResourceRepresentable {
         }
         */
     }
+
     
     func createFavorite(request: Request) throws -> ResponseRepresentable {
     //func createCategory(String.parameter) throws -> ResponseRepresentable {
@@ -68,7 +71,7 @@ final class UserController: Controlling, ResourceRepresentable {
         return okJSON
         //return try Response(status: .ok, json: json)
     }
-    
+
     func deleteFavorite(request: Request) throws -> ResponseRepresentable {
         //func createCategory(String.parameter) throws -> ResponseRepresentable {
         print("delete category hit")
@@ -126,6 +129,32 @@ final class UserController: Controlling, ResourceRepresentable {
     }
 */
     
+    func addCardRoutes(drop: Droplet){
+        let userGroup = drop.grouped("users", "card")
+        userGroup.post("addCard", handler: addCard)
+    }
+    
+    func addCard(request : Request) throws -> ResponseRepresentable {
+        print("Here I'm for adding a new card")
+        print("request is", request)
+        let user_id = request.data["user_id"]?.string
+        let stripeCustomerId = request.data["stripeCustomer_id"]?.string
+        let aStripeToken = request.data["stripe_token"]?.string
+        
+        let stripeClient = try StripeClient(apiKey: Constants.publishableKey)
+        stripeClient.initializeRoutes()
+        
+        try! stripeClient.customer.addNewSource(forCustomer: stripeCustomerId!, source: aStripeToken!)
+        
+        var okJSON = JSON()
+        try okJSON.set("status", "ok")
+        try okJSON.set("message", "Your Card was added successful!")
+        
+        return okJSON
+    }
+    
+    
+    
     func addGroupedRoutes(group: RouteBuilder) {
         
         
@@ -176,6 +205,8 @@ final class UserController: Controlling, ResourceRepresentable {
 //            clear: clear
         )
     }
+    
+    
 }
 
 //extension UserController: EmptyInitializable { }

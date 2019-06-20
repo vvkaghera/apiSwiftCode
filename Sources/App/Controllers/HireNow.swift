@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Stripe
+
 final class HireNow: Controlling {
     fileprivate let log: LogProtocol
     
@@ -16,8 +18,6 @@ final class HireNow: Controlling {
     func addOpenRoutes(drop: Droplet) {
         drop.get("orders") { req in return try self.get(req) }
     }
-    
-    
     
     func addGroupedRoutes(group: RouteBuilder) {
         group.post("orders") { req in return try self.post(req) }
@@ -76,6 +76,94 @@ final class HireNow: Controlling {
         //log.error("• in vendings.post()\n\(req)")
         guard let json = req.json else { throw Abort(.badRequest, reason: "No JSON in order/event post") }
         
+        //CheckCardIs Added or not
+        var orderJSON = JSON()
+        
+        guard let user = try User.makeQuery()
+            .filter(User.DB.id.ⓡ, req.data["user_id"])
+            .first()
+            else {
+                throw Abort(.badRequest, reason: "User does not exist")
+        }
+        
+        do {
+            let stripeClient = try StripeClient(apiKey: Constants.publishableKey)
+            stripeClient.initializeRoutes()
+            
+            let aUserQuery = try stripeClient.customer.retrieve(customer: user.stripeCustomer_id!)
+            let aUserResponse = try aUserQuery.serializedResponse()
+            
+            guard (aUserResponse.sources?.cardSources.count)! > 0 else {
+                try orderJSON.set("status", "fail")
+                try orderJSON.set("message", "Please add card to finalize this order!")
+                return orderJSON
+            }
+            
+            guard let event = try Event.makeQuery()
+                .filter(Event.DB.id.ⓡ, req.data["event_id"])
+                .first()
+                else {
+                    throw Abort(.badRequest, reason: "User does not exist")
+            }
+            
+            let hourDiff = Calendar.current.dateComponents([.hour], from: event.startTime, to: event.endTime).hour
+            
+            guard let service = try Service.makeQuery()
+                .filter(Service.DB.id.ⓡ, req.data["service_id"])
+                .first()
+                else {
+                    throw Abort(.badRequest, reason: "User does not exist")
+            }
+            
+            var aPriceStr : String = service.costWithUnit.components(separatedBy: CharacterSet(charactersIn: " " + "/")).first!
+            _ = aPriceStr.remove(at: aPriceStr.startIndex)
+            
+            var aChargeAmount = CharacterSet.decimalDigits.isSuperset(of: CharacterSet(charactersIn: aPriceStr)) ?
+                Int(aPriceStr)! : 50
+            
+            aChargeAmount = (hourDiff! * (aChargeAmount * 100))/2
+            
+            /*
+             if service.costWithUnit.contains("Per Person"){
+             
+             }
+             else if service.costWithUnit.contains("Per Hour"){
+             
+             }
+             else if service.costWithUnit.contains("Per Day"){
+             
+             }
+             else if service.costWithUnit.contains("Each"){
+             
+             }
+             else if service.costWithUnit.contains("Per Person, Per Hour"){
+             
+             }
+             else if service.costWithUnit.contains("Per Person, Per Day"){
+             
+             }
+             else {
+             
+             }
+             */
+            
+            
+            let charge = try stripeClient.charge.create(amount: aChargeAmount, in: .usd, description : "Deposit of \(service.description)", customer: user.stripeCustomer_id!, statementDescriptor: "First Purchase")
+            let chargeResponse = try charge.serializedResponse()
+            
+            print(chargeResponse)
+            if chargeResponse.status == Stripe.StripeStatus.succeeded{
+                
+            }
+            else{
+                try orderJSON.set("status", "fail")
+                try orderJSON.set("message", chargeResponse.failureMessage)
+                return orderJSON
+            }
+        } catch {
+            print("The file could not be loaded")
+        }
+        
         var orderTry: Order?
         do {
             orderTry = try Order(json: json)
@@ -92,9 +180,11 @@ final class HireNow: Controlling {
         } catch let error as Debuggable {
             throw Abort(.badRequest, reason: error.reason, identifier: error.identifier)
         }
-        var orderJSON = JSON()
+        
+        
         try orderJSON.set("status", "ok")
         try orderJSON.set("order", order)
+        
         return orderJSON
     }
     

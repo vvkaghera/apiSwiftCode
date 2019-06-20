@@ -2,6 +2,7 @@ import FluentProvider
 import PostgreSQLProvider
 import AuthProvider
 import VaporS3Signer
+import Stripe
 
 extension Config {
     public func setup() throws {
@@ -43,6 +44,12 @@ extension Config {
         preparations.append(Service.self)
         preparations.append(Event.self)
         preparations.append(Order.self)
+        preparations.append(Job.self)
+        preparations.append(Bid.self)
+        preparations.append(Ntest.self)
+       
+//        preparations.append(DeviceToken.self)
+        preparations.append(DeviceToken.self)
         preparations.append(Pivot<User, Vending>.self)
         preparations.append(CascadeMigration.self)
         preparations.append(PlusOneMigration.self)
@@ -50,4 +57,5 @@ extension Config {
         preparations.append(TextFieldsMigration.self)
         preparations.append(PostalCodeMigration.self)
     }
+    
 }

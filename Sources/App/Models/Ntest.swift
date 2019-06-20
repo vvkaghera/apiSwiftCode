@@ -8,41 +8,44 @@ import Foundation
 import AuthProvider
 import FluentProvider
 
-final class Order: Model, Timestampable {
+final class Ntest: Model, Timestampable {
     static let idType: IdentifierType = .uuid
     static let idKey = DB.id.ⓡ
     static var foreignIdKey = DB.id.ⓡ
     let storage = Storage()
     var log: LogProtocol?
     
+   
+    var jobId: Identifier
+    var title: String
+    var description: String
     var status: String
-    var additionalNotes: String
-    var userId: Identifier
-    var eventId: Identifier
-    var vendingId: Identifier
-    var serviceId: Identifier
+    var fromUserId: Identifier
+    var to: String
+    var type: String
     
     
     public enum DB: String {
-        case id = "order_id"
-        case userIdKey = "user_id"
-        case eventIdKey = "event_id"
-        case vendingIdKey = "vending_id"
-        case serviceIdKey = "service_id"
+        case id = "n_id"
+        case jobIdKey = "job_id"
+        case title = "title"
+        case description = "description"
         case status = "status"
-        case additionalNotes = "additional_notes"
-    
+        case fromUserId = "from_user_id"
+        case to = "to"
+        case type = "type"
     }
     
-    init(id: String? = nil, userId: Identifier, eventId: Identifier, vendingId: Identifier, serviceId: Identifier, status: String,
-         additionalNotes: String/*,
+    init(id: String? = nil, jobId: Identifier, title: String, descrption: String, status: String,
+         fromUserId: Identifier, to: String, type: String/*,
          user: User*/) throws {
-        self.userId = userId
-        self.eventId = eventId
-        self.vendingId = vendingId
-        self.serviceId = serviceId
+        self.jobId = jobId
+        self.title = title
+        self.description = descrption
         self.status = status
-        self.additionalNotes = additionalNotes
+        self.fromUserId = fromUserId
+        self.to = to
+        self.type = type
         
        /* guard let userId = user.id else { throw Abort(.badRequest, reason: "User id not found in vending init") }
         self.userId = userId*/
@@ -51,32 +54,35 @@ final class Order: Model, Timestampable {
     
     init(row: Row) throws {
         
-        userId = try row.get(DB.userIdKey.ⓡ)
-        eventId = try row.get(DB.eventIdKey.ⓡ)
-        vendingId = try row.get(DB.vendingIdKey.ⓡ)
-        serviceId =   try row.get(DB.serviceIdKey.ⓡ)
+        jobId = try row.get(DB.jobIdKey.ⓡ)
+        title = try row.get(DB.title.ⓡ)
+        description = try row.get(DB.description.ⓡ)
+        fromUserId =   try row.get(DB.fromUserId.ⓡ)
         status = try row.get(DB.status.ⓡ)
-        additionalNotes = try row.get(DB.additionalNotes.ⓡ)
+        to = try row.get(DB.to.ⓡ)
+        type = try row.get(DB.type.ⓡ)
     }
     
     func makeRow() throws -> Row {
         var row = Row()
-        try row.set(DB.userIdKey.ⓡ, userId)
-        try row.set(DB.eventIdKey.ⓡ, eventId)
-        try row.set(DB.vendingIdKey.ⓡ, vendingId)
-        try row.set(DB.serviceIdKey.ⓡ, serviceId)
+        try row.set(DB.jobIdKey.ⓡ, jobId)
+        try row.set(DB.title.ⓡ, title)
+        try row.set(DB.description.ⓡ, description)
+        try row.set(DB.fromUserId.ⓡ, fromUserId)
         try row.set(DB.status.ⓡ, status)
-        try row.set(DB.additionalNotes.ⓡ, additionalNotes)
+        try row.set(DB.to.ⓡ, to)
+        try row.set(DB.type.ⓡ, type)
         return row
     }
 }
 
-extension Order {
+/*
+extension Ntest {
     var owner: Parent<Order, Event> {
         return parent(id: eventId)
     }
 }
-
+*/
 
 
 /*extension Order {
@@ -85,10 +91,10 @@ extension Order {
     }
 }
 */
-extension Order: ResponseRepresentable { }
+extension Ntest: ResponseRepresentable { }
 //extension Vending: JSONRepresentable {}
 
-extension Order: Preparation {
+extension Ntest: Preparation {
     static func prepare(_ database: Database) throws {
         /*
          try database.create(self) { builder in
@@ -128,18 +134,16 @@ extension Order: Preparation {
     }
 }
 
-extension Order: JSONConvertible {
+extension Ntest: JSONConvertible {
     
     convenience init(json: JSON) throws {
         
         let id: String?
         let status : String?
-        let additionalNotes: String?
-        //let eventDate: Date?
-        //let startTime: Date?
-        //let endTime: Date?
-        
-        
+        let type: String?
+        let to: String?
+        let title: String?
+        let description: String?
         
         print("Order json=\(json)")
         do { id = try json.get(DB.id.ⓡ) } catch { id = nil }
@@ -148,37 +152,30 @@ extension Order: JSONConvertible {
             throw Abort(.badRequest, reason: "User id \(rawUserId) not found for order")
         }*/
 
-        guard let auserId: String = try json.get(DB.userIdKey.ⓡ) else {
-            throw Abort(.badRequest, reason: "userid not found for event/order")
+        guard let jobId: String = try json.get(DB.jobIdKey.ⓡ) else {
+            throw Abort(.badRequest, reason: "jobid not found for notificatiobn")
         }
         
-        guard let aeventId: String = try json.get(DB.eventIdKey.ⓡ) else {
-            throw Abort(.badRequest, reason: "eventid not found for event/order")
+        guard let fromUserId: String = try json.get(DB.fromUserId.ⓡ) else {
+            throw Abort(.badRequest, reason: "fromuserid not found for notification")
         }
-        
-        guard let avendingId: String = try json.get(DB.vendingIdKey.ⓡ) else {
-            throw Abort(.badRequest, reason: "vendingid not found for event/order")
-        }
-        
-        guard let aserviceId: String = try json.get(DB.serviceIdKey.ⓡ) else {
-            throw Abort(.badRequest, reason: "serviceid not found for event/order")
-        }
-        
         
         do { status = try json.get(DB.status.ⓡ) } catch { status = nil }
-        do { additionalNotes = try json.get(DB.additionalNotes.ⓡ) } catch { additionalNotes = nil }
-        
+        do { type = try json.get(DB.type.ⓡ) } catch { type = nil }
+        do { to = try json.get(DB.to.ⓡ) } catch { to = nil }
+        do { title = try json.get(DB.title.ⓡ) } catch { title = nil }
+         do { description = try json.get(DB.description.ⓡ) } catch { description = nil }
 
         
         
         try self.init(
             id: id,
-            userId: Identifier(auserId),
-            eventId: Identifier(aeventId),
-            vendingId: Identifier(avendingId),
-            serviceId: Identifier(aserviceId),
-            status: status ?? "",
-            additionalNotes: additionalNotes ?? ""//,
+            jobId: Identifier(jobId),
+            title: title ?? "",
+            descrption: description ?? "",
+            status: status ?? "", fromUserId: Identifier(fromUserId),
+            to: to ?? "",//,
+            type: type ?? ""//,
 //            user: auser
         )
     }
@@ -188,12 +185,13 @@ extension Order: JSONConvertible {
         try json.set(DB.id.ⓡ, id)
         
         
-        try json.set(DB.userIdKey.ⓡ, userId)
-        try json.set(DB.eventIdKey.ⓡ, eventId)
-        try json.set(DB.vendingIdKey.ⓡ, vendingId)
-        try json.set(DB.serviceIdKey.ⓡ, serviceId)
+        try json.set(DB.jobIdKey.ⓡ, jobId)
+        try json.set(DB.title.ⓡ, title)
+        try json.set(DB.description.ⓡ, description)
+        try json.set(DB.fromUserId.ⓡ, fromUserId)
         try json.set(DB.status.ⓡ, status)
-        try json.set(DB.additionalNotes.ⓡ, additionalNotes)
+        try json.set(DB.to.ⓡ, to)
+        try json.set(DB.type.ⓡ, type)
         print("json sent is", json)
         return json
     }
@@ -215,7 +213,7 @@ extension Order: Updateable {
 
 
 
-extension Order: TokenAuthenticatable {
+extension Ntest: TokenAuthenticatable {
     typealias TokenType = Token
 }
 

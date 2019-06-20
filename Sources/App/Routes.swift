@@ -2,10 +2,20 @@ import Foundation
 import Vapor
 import AuthProvider
 import S3SignerAWS
+import VaporAPNS
 
 extension Droplet {
 
+    
+    fileprivate func sendPushNotification() throws{
+    }
+    
     func setupRoutes() throws {
+        
+        
+        try sendPushNotification()
+  
+        
         // MARK: - Debug
         get("info") { req in
             let debugInfo = try Utility.info(droplet: self)
@@ -24,17 +34,33 @@ extension Droplet {
         tokenOnUsers.resource("users", users)
         //resource("favorites", users)
         users.addRoutes(drop: self)
+        users.addCardRoutes(drop: self)
         users.addGroupedRoutes(group: tokenOnUsers)
+        
         let vendings = try VendingController(log: self.log)
         vendings.addOpenRoutes(drop: self)
         vendings.addGroupedRoutes(group: tokenOnUsers)
+        
         let events = try EventController(log: self.log)
         events.addOpenRoutes(drop: self)
         events.addGroupedRoutes(group: tokenOnUsers)
+        events.addSpecificRoutes(router: self.router)
         
         let orders = try HireNow(log: self.log)
         orders.addOpenRoutes(drop: self)
         orders.addGroupedRoutes(group: tokenOnUsers)
+        
+        let jobs = try JobController(log: self.log)
+        jobs.addOpenRoutes(drop: self)
+        jobs.addGroupedRoutes(group: tokenOnUsers)
+        
+        let vendorRating = try VendorRatingController(log: self.log)
+        vendorRating.addOpenRoutes(drop: self)
+        vendorRating.addGroupedRoutes(group: tokenOnUsers)
+        
+        let bids = try BidController(log: self.log)
+        bids.addOpenRoutes(drop: self)
+        bids.addGroupedRoutes(group: tokenOnUsers)
         
         //let favorites = try FavoriteController(log: self.log)
         //favorites.addOpenRoutes(drop: self)

@@ -13,6 +13,7 @@ final class Token: Model {
         case token
         case expires
         case userID = "user_id"
+         case deviceToken = "device_token"
     }
 
     let storage = Storage()
@@ -20,12 +21,14 @@ final class Token: Model {
     let token: String
     let userID: Identifier
     let expires: Date
+    let deviceToken: String
 
     /// Creates a new Token
-    init(string: String, user: User, expires: Date? = nil) throws {
+    init(string: String, user: User, expires: Date? = nil, aDeviceTok: String) throws {
         token = string
         self.expires = expires ?? Token.getExpires()
         userID = try user.assertExists()
+        deviceToken = aDeviceTok
     }
 
     // MARK: Row
@@ -34,6 +37,7 @@ final class Token: Model {
         token = try row.get(DB.token.ⓡ)
         expires = try row.get(DB.expires.ⓡ)
         userID = try row.get(User.foreignIdKey)
+        deviceToken = try row.get(DB.deviceToken.ⓡ)
     }
 
     func makeRow() throws -> Row {
@@ -41,6 +45,7 @@ final class Token: Model {
         try row.set(DB.token.ⓡ, token)
         try row.set(DB.expires.ⓡ, expires)
         try row.set(User.foreignIdKey, userID)
+         try row.set(DB.deviceToken.ⓡ, deviceToken)
         return row
     }
 }
@@ -49,13 +54,14 @@ final class Token: Model {
 
 extension Token {
     /// Generates a new token for the supplied User.
-    static func generate(for user: User) throws -> Token {
+    static func generate(for user: User, aDeviceToken: String) throws -> Token {
         try Token.delete(for: user)
         // generate random bits using OpenSSL
         let random = try Crypto.Random.bytes(count: 64)
         // 0xtim: "That’s how I generate OAuth tokens?  try Random.bytes(count: 32).hexString
-
-        return try Token(string: random.base64Encoded.makeString(), user: user)
+        
+        return try Token(string: random.base64Encoded.makeString(), user: user, aDeviceTok: aDeviceToken)
+//        return try Token(string: random.base64Encoded.makeString(), user: user)
     }
 
     static func getExpires(from date: Date = Date()) -> Date {
