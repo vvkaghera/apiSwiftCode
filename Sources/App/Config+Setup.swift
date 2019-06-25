@@ -47,6 +47,7 @@ extension Config {
         preparations.append(Job.self)
         preparations.append(Bid.self)
         preparations.append(Ntest.self)
+        preparations.append(Notification.self)
        
 //        preparations.append(DeviceToken.self)
         preparations.append(DeviceToken.self)

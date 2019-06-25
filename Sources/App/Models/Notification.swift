@@ -1,14 +1,16 @@
 //
-//  Order.swift
+//  Notification.swift
 //  App
 //
-//  Created by MAC001 on 05/04/19.
+//  Created by MAC001 on 24/06/19.
 //
+
 import Foundation
 import AuthProvider
 import FluentProvider
 
-final class Ntest: Model, Timestampable {
+
+final class Notification: Model, Timestampable {
     
     static let idType: IdentifierType = .uuid
     static let idKey = DB.id.ⓡ
@@ -25,7 +27,7 @@ final class Ntest: Model, Timestampable {
     var type: String
     
     public enum DB: String {
-        case id = "n_id"
+        case id = "notification_id"
         case jobIdKey = "job_id"
         case title = "title"
         case description = "description"
@@ -46,8 +48,8 @@ final class Ntest: Model, Timestampable {
         self.to = to
         self.type = type
         
-       /* guard let userId = user.id else { throw Abort(.badRequest, reason: "User id not found in vending init") }
-        self.userId = userId*/
+        /* guard let userId = user.id else { throw Abort(.badRequest, reason: "User id not found in vending init") }
+         self.userId = userId*/
         if let id = id { self.id = Identifier(id) }
     }
     
@@ -75,25 +77,10 @@ final class Ntest: Model, Timestampable {
     }
 }
 
-/*
-extension Ntest {
-    var owner: Parent<Order, Event> {
-        return parent(id: eventId)
-    }
-}
-*/
 
+extension Notification: ResponseRepresentable { }
 
-/*extension Order {
-    var owner: Parent<Order, User> {
-        return parent(id: userId)
-    }
-}
-*/
-extension Ntest: ResponseRepresentable { }
-//extension Vending: JSONRepresentable {}
-
-extension Ntest: Preparation {
+extension Notification: Preparation {
     static func prepare(_ database: Database) throws {
         /*
          try database.create(self) { builder in
@@ -133,7 +120,7 @@ extension Ntest: Preparation {
     }
 }
 
-extension Ntest: JSONConvertible {
+extension Notification: JSONConvertible {
     
     convenience init(json: JSON) throws {
         
@@ -146,11 +133,11 @@ extension Ntest: JSONConvertible {
         
         print("Order json=\(json)")
         do { id = try json.get(DB.id.ⓡ) } catch { id = nil }
-       /* let rawUserId: String = try json.get(Order.DB.userIdKey.ⓡ)
-        guard let auser = try User.find(rawUserId) else {
-            throw Abort(.badRequest, reason: "User id \(rawUserId) not found for order")
-        }*/
-
+        /* let rawUserId: String = try json.get(Order.DB.userIdKey.ⓡ)
+         guard let auser = try User.find(rawUserId) else {
+         throw Abort(.badRequest, reason: "User id \(rawUserId) not found for order")
+         }*/
+        
         guard let jobId: String = try json.get(DB.jobIdKey.ⓡ) else {
             throw Abort(.badRequest, reason: "jobid not found for notificatiobn")
         }
@@ -163,8 +150,8 @@ extension Ntest: JSONConvertible {
         do { type = try json.get(DB.type.ⓡ) } catch { type = nil }
         do { to = try json.get(DB.to.ⓡ) } catch { to = nil }
         do { title = try json.get(DB.title.ⓡ) } catch { title = nil }
-         do { description = try json.get(DB.description.ⓡ) } catch { description = nil }
-
+        do { description = try json.get(DB.description.ⓡ) } catch { description = nil }
+        
         
         
         try self.init(
@@ -175,7 +162,7 @@ extension Ntest: JSONConvertible {
             status: status ?? "", fromUserId: Identifier(fromUserId),
             to: to ?? "",//,
             type: type ?? ""//,
-//            user: auser
+            //            user: auser
         )
     }
     
@@ -195,24 +182,7 @@ extension Ntest: JSONConvertible {
         return json
     }
 }
-/*
-extension Order: Updateable {
-    static var updateableKeys: [UpdateableKey<Order>] {
-        return [
-            UpdateableKey(DB.userIdKey.ⓡ, String.self) { aabb, aaaaaaa in aabb.userId = aaaaaaa },
-            UpdateableKey(DB.eventIdKey.ⓡ, String.self) { aabb, content in aabb.eventID = content},
-            UpdateableKey(DB.vendingIdKey.ⓡ, String.self) { event, content in event.vendingId = content },
-            UpdateableKey(DB.serviceIdKey.ⓡ, String.self) { event, content in event.serviceId = content },
-            UpdateableKey(DB.status.ⓡ, String.self) { event, content in event.status = content },
-            UpdateableKey(DB.additionalNotes.ⓡ, String.self) { event, content in event.additionalNotes = content }
-            
-        ]
-    }
-}*/
 
-
-
-extension Ntest: TokenAuthenticatable {
+extension Notification: TokenAuthenticatable {
     typealias TokenType = Token
 }
-

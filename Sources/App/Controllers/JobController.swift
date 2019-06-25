@@ -72,15 +72,47 @@ final class JobController: Controlling {
             throw Abort(.badRequest, reason: error.reason, identifier: error.identifier)
         }
         
+        //Add notificatio entry to notification table
+        var arrVendors = [Vending]()
+        let dictServices : [String : Bool] = ["offers_food" : req.data["offers_food"]!.bool!,
+                            "offers_entertainment": req.data["offers_entertainment"]!.bool!,
+                            "offers_music" : req.data["offers_music"]!.bool!,
+                            "offers_rentals" : req.data["offers_rentals"]!.bool!,
+                            "offers_services" : req.data["offers_services"]!.bool!,
+                            "offers_party_packs" : req.data["offers_party_packs"]!.bool!,
+                            "offers_venue" : req.data["offers_venue"]!.bool!]
         
-        let aaaaaNtest = try Ntest(id: UUID().uuidString, jobId: "80d1a5ad-7db1-448c-893a-edc3ec0044bd", title: "vvk", descrption: "tet0001", status: "1", fromUserId: job.userId, to: "A9E4BA49D51B9EBF378D4D23F06DD3260963C5618D6BF0FC45A027902AD77795", type: "1")
+        let arrKeys = dictServices.keys
+        
+        for aKey in arrKeys{
+            
+            guard let vendors : [Vending] = try Vending.makeQuery()
+                .filter(aKey, dictServices[aKey])
+                .all()
+                else {
+                    throw Abort(.badRequest, reason: "No Vendor found :(")
+            }
+            
+            arrVendors.append(contentsOf: vendors)
+        }
         
         
-        
-        do {
-            try aaaaaNtest.save()
-        } catch let error as Debuggable {
-            throw Abort(.badRequest, reason: error.reason, identifier: error.identifier)
+        var unique = [Vending]()
+        for aVendor in arrVendors {
+            let aArrSeen = unique.filter({ $0.id == aVendor.id})
+            if aArrSeen.count == 0{
+                unique.append(aVendor)
+            }
+        }
+
+        for aVendor in unique{
+            let aNotification = try Notification(id: UUID().uuidString, jobId: job.id!, title: "Notification Test", descrption: job.additionalNotes, status: "1", fromUserId: job.userId, to: (aVendor.id?.string)!, type: "1")
+            
+            do {
+                try aNotification.save()
+            } catch let error as Debuggable {
+                throw Abort(.badRequest, reason: error.reason, identifier: error.identifier)
+            }
         }
         
         var jobJSON = JSON()
@@ -89,7 +121,6 @@ final class JobController: Controlling {
         
         try sendPushNotification(req, job)
         //----------------------
-        
 
         return jobJSON
     }
