@@ -73,38 +73,35 @@ final class JobController: Controlling {
         }
         
         //Add notificatio entry to notification table
-        var arrVendors = [Vending]()
         let dictServices : [String : Bool] = ["offers_food" : req.data["offers_food"]!.bool!,
-                            "offers_entertainment": req.data["offers_entertainment"]!.bool!,
-                            "offers_music" : req.data["offers_music"]!.bool!,
-                            "offers_rentals" : req.data["offers_rentals"]!.bool!,
-                            "offers_services" : req.data["offers_services"]!.bool!,
-                            "offers_party_packs" : req.data["offers_party_packs"]!.bool!,
-                            "offers_venue" : req.data["offers_venue"]!.bool!]
+                                              "offers_entertainment": req.data["offers_entertainment"]!.bool!,
+                                              "offers_music" : req.data["offers_music"]!.bool!,
+                                              "offers_rentals" : req.data["offers_rentals"]!.bool!,
+                                              "offers_services" : req.data["offers_services"]!.bool!,
+                                              "offers_party_packs" : req.data["offers_party_packs"]!.bool!,
+                                              "offers_venue" : req.data["offers_venue"]!.bool!]
         
-        let arrKeys = dictServices.keys
-        
-        for aKey in arrKeys{
-            
-            guard let vendors : [Vending] = try Vending.makeQuery()
-                .filter(aKey, dictServices[aKey])
-                .all()
-                else {
-                    throw Abort(.badRequest, reason: "No Vendor found :(")
-            }
-            
-            arrVendors.append(contentsOf: vendors)
+        guard let vendors : [Vending] = try Vending.makeQuery()
+            .filter("offers_food", req.data["offers_entertainment"]!.bool!)
+            .filter("offers_entertainment", req.data["offers_entertainment"]!.bool!)
+            .filter("offers_music", req.data["offers_music"]!.bool!)
+            .filter("offers_rentals", req.data["offers_rentals"]!.bool!)
+            .filter("offers_services", req.data["offers_services"]!.bool!)
+            .filter("offers_party_packs", req.data["offers_party_packs"]!.bool!)
+            .filter("offers_venue", req.data["offers_venue"]!.bool!)
+            .all()
+            else {
+                throw Abort(.badRequest, reason: "No Vendor found :(")
         }
         
-        
         var unique = [Vending]()
-        for aVendor in arrVendors {
-            let aArrSeen = unique.filter({ $0.id == aVendor.id})
+        for aVendor in vendors {
+            let aArrSeen = unique.filter({ $0.id == aVendor.id })
             if aArrSeen.count == 0{
                 unique.append(aVendor)
             }
         }
-
+        
         for aVendor in unique{
             let aNotification = try Notification(id: UUID().uuidString, jobId: job.id!, title: "Notification Test", descrption: job.additionalNotes, status: "1", fromUserId: job.userId, to: (aVendor.id?.string)!, type: "1")
             
@@ -123,9 +120,8 @@ final class JobController: Controlling {
         try jobJSON.set("job", job)
         try jobJSON.set("notificationFilePath", filePath)
         
-        //try sendPushNotification(req, job)
+        try sendPushNotification(req, job)
         //----------------------
-
         return jobJSON
     }
     
@@ -163,7 +159,6 @@ final class JobController: Controlling {
         return okJSON
     }
     
-    
     fileprivate func sendPushNotification(_ req: Request, _ job: Job) throws{
 
         let folderPath = #file.components(separatedBy: "/").dropLast().joined(separator: "/")
@@ -193,17 +188,17 @@ final class JobController: Controlling {
             if case let .success(messageId,deviceToken,serviceStatus) = result, case .success = serviceStatus {
                 print ("Success!")
                 print("messageId: \(messageId)  |||  deviceToken: \(deviceToken)  |||  serviceStatus:\(serviceStatus)")
-                saveNotification(job, payload, deviceToken)
+                //saveNotification(job, payload, deviceToken)
             }
         }
     }
     
-    fileprivate func saveNotification(_ job: Job, _ payload: Payload, _ deviceToken: String )  {
-        
-        let objNtest = try? Ntest(id: UUID().uuidString, jobId: job.id!, title: payload.title!, descrption: payload.body!, status: "1", fromUserId: job.userId, to: deviceToken, type: "1")
-        try? objNtest?.save()
-        print(objNtest)
-    }
+//    fileprivate func saveNotification(_ job: Job, _ payload: Payload, _ deviceToken: String )  {
+//
+//        let objNtest = try? Ntest(id: UUID().uuidString, jobId: job.id!, title: payload.title!, descrption: payload.body!, status: "1", fromUserId: job.userId, to: deviceToken, type: "1")
+//        try? objNtest?.save()
+//        print(objNtest)
+//    }
     
 }
 
