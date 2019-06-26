@@ -120,7 +120,7 @@ final class JobController: Controlling {
         try jobJSON.set("job", job)
         try jobJSON.set("notificationFilePath", filePath)
         
-        try sendPushNotification(req, job)
+        //try sendPushNotification(req, job)
         //----------------------
         return jobJSON
     }
