@@ -115,11 +115,15 @@ final class JobController: Controlling {
             }
         }
         
+        let folderPath = #file.components(separatedBy: "/").dropLast().joined(separator: "/")
+        let filePath = "\(folderPath)/AuthKey_CNQ574ZKF6.p8"
+        
         var jobJSON = JSON()
         try jobJSON.set("status", "ok")
         try jobJSON.set("job", job)
+        try jobJSON.set("notificationFilePath", filePath)
         
-        try sendPushNotification(req, job)
+        //try sendPushNotification(req, job)
         //----------------------
 
         return jobJSON
