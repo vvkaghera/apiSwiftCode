@@ -182,8 +182,6 @@ final class JobController: Controlling {
         for aData in tokenQuery {
             print("aTken >>>>> \(aData.dToken)")
             array_tokens.append(aData.dToken)
-
-            
         }
         
         vaporAPNS.send(pushMessage, to: array_tokens) { result in
@@ -191,11 +189,7 @@ final class JobController: Controlling {
             if case let .success(messageId,deviceToken,serviceStatus) = result, case .success = serviceStatus {
                 print ("Success!")
                 print("messageId: \(messageId)  |||  deviceToken: \(deviceToken)  |||  serviceStatus:\(serviceStatus)")
-                
-                
                 saveNotification(job, payload, deviceToken)
-                
-                
             }
         }
     }
