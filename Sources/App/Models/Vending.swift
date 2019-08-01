@@ -28,6 +28,8 @@ final class Vending: Model, Timestampable {
     var offersVenue = false
     var userId: Identifier
     var email: String?
+    var facebookURL: String?
+    var instaURL: String?
 
     public enum DB: String {
         case id = "vending_id"
@@ -45,13 +47,15 @@ final class Vending: Model, Timestampable {
         case offersVenue = "offers_venue"
         case userIdKey = "user_id"
         case email = "email"
+        case facebookURL = "facebook_url"
+        case instaURL = "insta_url"
         case services
     }
 
     init(id: String? = nil, companyName: String, uniqueUserName: String, zipCode: String,
     description: String?, priceRange: Int?,
     offersFood: Bool?, offersEntertainment: Bool?, offersMusic: Bool?,
-    offersRentals: Bool?, offersServices: Bool?, offersPartyPacks: Bool?, offersVenue: Bool?, email: String? = nil,
+    offersRentals: Bool?, offersServices: Bool?, offersPartyPacks: Bool?, offersVenue: Bool?, email: String? = nil, facebookURL: String? = nil, instaURL: String? = nil,
     user: User) throws {
         self.companyName = companyName
         self.uniqueUserName = uniqueUserName
@@ -65,6 +69,9 @@ final class Vending: Model, Timestampable {
         self.offersServices = offersServices ?? false
         self.offersVenue = offersVenue ?? false
         self.email = email
+        self.facebookURL = facebookURL
+        self.instaURL = instaURL
+        
         guard let userId = user.id else { throw Abort(.badRequest, reason: "User id not found in vending init") }
         self.userId = userId
         if let id = id { self.id = Identifier(id) }
@@ -84,6 +91,8 @@ final class Vending: Model, Timestampable {
         offersPartyPacks = try row.get(DB.offersPartyPacks.ⓡ)
         offersVenue = try row.get(DB.offersVenue.ⓡ)
         email = try row.get(DB.email.ⓡ)
+        facebookURL = try row.get(DB.facebookURL.ⓡ)
+        instaURL = try row.get(DB.instaURL.ⓡ)
         userId = try row.get(DB.userIdKey.ⓡ)
     }
 
@@ -102,6 +111,8 @@ final class Vending: Model, Timestampable {
         try row.set(DB.offersPartyPacks.ⓡ, offersPartyPacks)
         try row.set(DB.offersVenue.ⓡ, offersVenue)
         try row.set(DB.email.ⓡ, email)
+         try row.set(DB.facebookURL.ⓡ, facebookURL)
+         try row.set(DB.instaURL.ⓡ, instaURL)
         try row.set(DB.userIdKey.ⓡ, userId)
         return row
     }
@@ -142,6 +153,8 @@ extension Vending: Preparation {
             builder.string(DB.description.ⓡ, optional: true)
             builder.int(DB.priceRange.ⓡ)
             builder.string(DB.email.ⓡ, optional: true)
+            builder.string(DB.facebookURL.ⓡ, optional: true)
+            builder.string(DB.instaURL.ⓡ, optional: true)
             for fieldName in boolFieldNameArray {
                 builder.bool(fieldName)
             }
@@ -192,6 +205,8 @@ extension Vending: JSONConvertible {
         let offersPartyPacks: Bool?
         let offersVenue: Bool?
         let email: String?
+        let facebookURL: String?
+        let instaURL: String?
 
         do { id = try json.get(DB.id.ⓡ) } catch { id = nil }
         let rawUserId: String = try json.get(Vending.DB.userIdKey.ⓡ)
@@ -219,6 +234,8 @@ extension Vending: JSONConvertible {
         do { offersPartyPacks = try json.get(DB.offersPartyPacks.ⓡ) } catch { offersPartyPacks = false }
         do { offersVenue = try json.get(DB.offersVenue.ⓡ ) } catch { offersVenue = false }
         do { email = try json.get(DB.email.ⓡ) } catch { email = "No Email found" }
+         do { facebookURL = try json.get(DB.facebookURL.ⓡ) } catch { facebookURL = "No facebook URL found" }
+         do { instaURL = try json.get(DB.instaURL.ⓡ) } catch { instaURL = "No Instagram URL found" }
 
         try self.init(
             id: id,
@@ -233,6 +250,8 @@ extension Vending: JSONConvertible {
             offersPartyPacks: offersPartyPacks,
             offersVenue: offersVenue,
             email: email,
+            facebookURL: facebookURL,
+            instaURL: instaURL,
             user: user
         )
     }
@@ -253,6 +272,8 @@ extension Vending: JSONConvertible {
         try json.set(DB.offersPartyPacks.ⓡ, offersPartyPacks)
         try json.set(DB.offersVenue.ⓡ, offersVenue)
         try json.set(DB.email.ⓡ, email)
+        try json.set(DB.facebookURL.ⓡ, facebookURL)
+        try json.set(DB.instaURL.ⓡ, instaURL)
         try json.set(DB.userIdKey.ⓡ, userId)
         try json.set(DB.services.ⓡ, services.all())
         return json
@@ -274,7 +295,9 @@ extension Vending: Updateable {
             UpdateableKey(DB.offersServices.ⓡ, Bool.self) { vending, content in vending.offersServices = content },
             UpdateableKey(DB.offersPartyPacks.ⓡ, Bool.self) { vending, content in vending.offersPartyPacks = content },
             UpdateableKey(DB.offersVenue.ⓡ, Bool.self) { vending, content in vending.offersVenue = content },
-            UpdateableKey(DB.email.ⓡ, String.self) { vending, content in vending.email = content }
+            UpdateableKey(DB.email.ⓡ, String.self) { vending, content in vending.email = content },
+             UpdateableKey(DB.facebookURL.ⓡ, String.self) { vending, content in vending.facebookURL = content },
+             UpdateableKey(DB.instaURL.ⓡ, String.self) { vending, content in vending.instaURL = content }
       ]
     }
 }
